@@ -4,6 +4,9 @@
 /public/storage
 /storage/*.key
 /vendor
+/composer.phar
+/bootstrap/cache/routes-*.php
+backup*.sql
 .env
 .env_SERVIDOR
 .env.backup

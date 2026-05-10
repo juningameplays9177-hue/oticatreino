@@ -183,8 +183,7 @@ Route::middleware('auth')->group(function () {
     Route::post('clients', [\App\Http\Controllers\ClientsController::class, 'store'])->name('clients.store');
     Route::get('clients/{client}', [\App\Http\Controllers\ClientsController::class, 'show'])->name('clients.show');
     Route::get('clients/{client}/edit', [\App\Http\Controllers\ClientsController::class, 'edit'])->name('clients.edit');
-    Route::put('clients/{client}', [\App\Http\Controllers\ClientsController::class, 'update'])->name('clients.update');
-    Route::patch('clients/{client}', [\App\Http\Controllers\ClientsController::class, 'update'])->name('clients.update');
+    Route::match(['put', 'patch'], 'clients/{client}', [\App\Http\Controllers\ClientsController::class, 'update'])->name('clients.update');
     Route::delete('clients/{client}', [\App\Http\Controllers\ClientsController::class, 'destroy'])->name('clients.destroy');
 
     // Rotas de gerenciamento de produtos
