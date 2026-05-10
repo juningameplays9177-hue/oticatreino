@@ -3,6 +3,24 @@
     
     # Desabilitar listagem de diretórios
     Options -Indexes
+
+    # -------------------------------------------------------------------------
+    # Segurança: negar acesso público a tudo que não deve ser servido pela web
+    # (Laravel vive acima de public/; sem isto, /vendor, /storage, .env etc. podem vazar)
+    # -------------------------------------------------------------------------
+    RewriteRule ^(app|bootstrap|config|database|resources|routes|vendor|tests|node_modules)(/|$) - [F,L]
+    # storage/: permitir apenas o que for servido via public/storage (symlink); bloquear o resto
+    RewriteRule ^storage/(framework|logs)(/|$) - [F,L]
+    RewriteRule ^storage/app(/|$) - [F,L]
+    RewriteRule ^storage/.*\.key$ - [F,L]
+    RewriteRule ^\.git(/|$) - [F,L]
+    RewriteRule ^\.env - [F,L]
+    RewriteRule ^artisan$ - [F,L]
+    RewriteRule ^composer\.(json|lock)$ - [F,L]
+    RewriteRule ^package(-lock)?\.json$ - [F,L]
+    RewriteRule ^phpunit\.xml(\.dist)?$ - [F,L]
+    # Arquivos soltos na raiz do projeto (não são da pasta public/)
+    RewriteRule ^[^/]+\.(blade\.php|sql)$ - [F,L]
     
     # PRIORIDADE 1: Forçar rotas do Laravel para public/index.php ANTES de qualquer verificação
     # Isso previne que o servidor bloqueie rotas que parecem diretórios
