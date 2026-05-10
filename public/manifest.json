@@ -1,0 +1,36 @@
+{
+  "name": "Hospital dos Óculos",
+  "short_name": "HpOculos",
+  "description": "Sistema de gestão para óticas",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "any",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "PDV",
+      "short_name": "PDV",
+      "description": "Acessar Ponto de Venda",
+      "url": "/pdv",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Ordens de Serviço",
+      "short_name": "OS",
+      "description": "Gerenciar Ordens de Serviço",
+      "url": "/os",
+      "icons": [{ "src": "/icon-96x96.png", "sizes": "96x96" }]
+    }
+  ]
+}
+

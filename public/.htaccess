@@ -1,0 +1,101 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Forçar HTTPS (redirecionar HTTP para HTTPS)
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Desabilitar listagem de diretórios explicitamente
+    Options -Indexes
+    
+    # PRIORIDADE 1: Permitir acesso direto a arquivos de build do Vite
+    # Estes arquivos devem ser servidos diretamente pelo servidor web
+    # IMPORTANTE: Esta regra deve vir ANTES de qualquer redirecionamento
+    # Verificar se é um arquivo de build e se existe fisicamente
+    RewriteCond %{REQUEST_URI} ^/build/
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    
+    # Alternativa: Verificar explicitamente se o arquivo existe em public/build/
+    RewriteCond %{REQUEST_URI} ^/build/(.+)$
+    RewriteCond %{DOCUMENT_ROOT}/build/$1 -f
+    RewriteRule ^build/(.+)$ /build/$1 [L]
+    
+    # PRIORIDADE 2: SOLUÇÃO PARA LITESPEED: Redirecionar /clients/ para /clientes APENAS para GET
+    # IMPORTANTE: NÃO redirecionar POST, PUT, DELETE - deixar passar para o Laravel
+    RewriteCond %{REQUEST_METHOD} ^GET$
+    RewriteCond %{REQUEST_URI} ^/clients/?$
+    RewriteRule ^clients/?$ /clientes [R=301,L]
+    
+    # PRIORIDADE 3: Forçar POST para /clients passar direto para o Laravel (sem redirecionamento)
+    RewriteCond %{REQUEST_METHOD} ^POST$
+    RewriteCond %{REQUEST_URI} ^/clients/?$
+    RewriteRule ^ index.php [L]
+    
+    # PRIORIDADE 4: Forçar rotas do Laravel para index.php ANTES de verificar se são diretórios
+    # Isso previne que o servidor bloqueie rotas que parecem diretórios
+    RewriteCond %{REQUEST_URI} ^/(users|products|stock|finance|cadastros|profile|os|clients|clientes|dashboard|api)/
+    RewriteRule ^ index.php [L]
+    
+    # PRIORIDADE 5: Redirecionar todas as requisições para index.php (Laravel)
+    # Se não for um arquivo ou diretório físico, passar para o Laravel
+    # IMPORTANTE: Esta regra deve ser a última
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Configurações específicas para LiteSpeed
+<IfModule LiteSpeed>
+    # Permitir todas as requisições
+    RewriteEngine On
+    
+    # Desabilitar listagem de diretórios
+    Options -Indexes
+    
+    # PRIORIDADE 1: Permitir acesso direto a arquivos de build do Vite
+    # No contexto do public/.htaccess, REQUEST_FILENAME já está relativo a public/
+    # Então /build/assets/app-BPtKTxr8.css já aponta para public/build/assets/app-BPtKTxr8.css
+    RewriteCond %{REQUEST_URI} ^/build/
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+    
+    # PRIORIDADE 2: IMPORTANTE: Redirecionar /clients/ para /clientes APENAS para GET
+    # NÃO redirecionar POST, PUT, DELETE - deixar passar para o Laravel
+    RewriteCond %{REQUEST_METHOD} ^GET$
+    RewriteCond %{REQUEST_URI} ^/clients/?$
+    RewriteRule ^clients/?$ /clientes [R=301,L]
+    
+    # PRIORIDADE 3: Forçar POST para /clients passar direto para o Laravel (sem redirecionamento)
+    RewriteCond %{REQUEST_METHOD} ^POST$
+    RewriteCond %{REQUEST_URI} ^/clients/?$
+    RewriteRule ^ index.php [L]
+    
+    # PRIORIDADE 4: Forçar todas as rotas do Laravel para index.php
+    # IMPORTANTE: Mesmo que pareçam diretórios, passar para o Laravel
+    # Lista de rotas conhecidas que devem sempre ir para o Laravel
+    RewriteCond %{REQUEST_URI} ^/(users|products|stock|finance|cadastros|profile|os|clients|clientes|dashboard|api)/
+    RewriteRule ^ index.php [L]
+    
+    # PRIORIDADE 5: Redirecionar tudo mais para index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index.php [L]
+</IfModule>
+
+# Permitir acesso a todos os arquivos (o Laravel vai tratar autenticação)
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>

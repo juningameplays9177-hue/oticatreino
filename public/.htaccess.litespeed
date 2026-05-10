@@ -1,0 +1,12 @@
+# Configuração específica para LiteSpeed Web Server
+# Se o servidor usar LiteSpeed, renomeie este arquivo para .htaccess
+
+<IfModule LiteSpeed>
+    # Permitir todas as requisições
+    RewriteEngine On
+    
+    # Redirecionar tudo para index.php
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule . index.php [L]
+</IfModule>

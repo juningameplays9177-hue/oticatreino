@@ -1,0 +1,40 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Desabilitar listagem de diretórios
+    Options -Indexes
+    
+    # PRIORIDADE 1: Forçar rotas do Laravel para public/index.php ANTES de qualquer verificação
+    # Isso previne que o servidor bloqueie rotas que parecem diretórios
+    RewriteCond %{REQUEST_URI} ^/(users|products|stock|finance|cadastros|profile|os|clients|clientes|dashboard|api)/
+    RewriteRule ^ public/index.php [L]
+    
+    # PRIORIDADE 2: Permitir acesso direto a arquivos estáticos em public/build/
+    # Se a requisição é para /build/assets/..., redirecionar para public/build/assets/...
+    RewriteCond %{REQUEST_URI} ^/build/(.*)$
+    RewriteCond %{DOCUMENT_ROOT}/public/build/$1 -f
+    RewriteRule ^build/(.*)$ public/build/$1 [L]
+    
+    # PRIORIDADE 3: Permitir acesso direto a outros arquivos estáticos em public/
+    # Verificar se é um arquivo físico em public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ public/$1 [L]
+    
+    # PRIORIDADE 4: Redirecionar tudo mais para public/index.php (Laravel)
+    # IMPORTANTE: Não bloquear nenhuma requisição aqui - deixar o Laravel decidir
+    # Isso inclui diretórios que não existem fisicamente
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ public/index.php [L]
+</IfModule>
+
+# Permitir acesso a todos os arquivos (o Laravel vai tratar autenticação)
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Allow from all
+</IfModule>
